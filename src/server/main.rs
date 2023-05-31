@@ -5,10 +5,13 @@ use bevy::{
 };
 use std::time::Duration;
 
-use naia_bevy_server::{Plugin as ServerPlugin, ServerConfig};
+use naia_bevy_server::{Plugin as ServerPlugin, ReceiveEvents, ServerConfig};
 use shared::protocol::protocol;
 
+mod resources;
 mod systems;
+
+use systems::events;
 use systems::init;
 
 fn main() {
@@ -27,5 +30,6 @@ fn main() {
             protocol(),
         ))
         .add_startup_system(init)
+        .add_systems((events::connect_events,).chain().in_set(ReceiveEvents))
         .run();
 }

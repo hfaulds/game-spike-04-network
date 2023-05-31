@@ -1,9 +1,9 @@
 use bevy::{
-    prelude::{App, ClearColor, Color, IntoSystemConfigs, IntoSystemSetConfig, SystemSet},
+    prelude::{App, ClearColor, Color, SystemSet},
     DefaultPlugins,
 };
 
-use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin, ReceiveEvents};
+use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin};
 use shared::protocol::protocol;
 
 mod systems;
@@ -17,15 +17,10 @@ struct Tick;
 
 pub fn main() {
     App::default()
-        // Bevy Plugins
         .add_plugins(DefaultPlugins)
-        // Add Naia Client Plugin
         .add_plugin(ClientPlugin::new(ClientConfig::default(), protocol()))
-        // Background Color
         .insert_resource(ClearColor(Color::BLACK))
-        // Startup System
         .add_startup_system(init)
-        // Receive Client Events
         /*.add_systems(
             (
                 events::connect_events,

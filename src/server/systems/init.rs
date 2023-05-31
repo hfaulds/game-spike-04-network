@@ -1,11 +1,12 @@
+use bevy::prelude::*;
 use bevy::ecs::system::Commands;
 
 use naia_bevy_server::{transport::webrtc, Server};
 
-//use crate::resources::Global;
+use super::super::resources::Global;
 
 pub fn init(mut commands: Commands, mut server: Server) {
-    println!("Naia Bevy Server Demo is running");
+    info!("Naia Bevy Server Demo is running");
 
     // Naia Server initialization
     let server_addresses = webrtc::ServerAddrs::new(
@@ -24,5 +25,8 @@ pub fn init(mut commands: Commands, mut server: Server) {
 
     // Create a new, singular room, which will contain Users and Entities that they
     // can receive updates from
-    let _main_room_key = server.make_room().key();
+    let main_room_key = server.make_room().key();
+
+    // Insert the Global resource, which will be used by other systems
+    commands.insert_resource(Global { main_room_key });
 }
