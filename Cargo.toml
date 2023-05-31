@@ -1,0 +1,27 @@
+[package]
+name = "game-spike-04-network"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.10.1"
+bevy_rapier2d = "0.21.0"
+naia-bevy-client = { version = "0.21.0", features = [ "transport_webrtc" ] }
+naia-bevy-server = { version = "0.21.0", features = [ "transport_webrtc" ] }
+naia-bevy-shared = "0.21.0"
+rapier2d = { version = "0.17.2", features = [ "enhanced-determinism" ] }
+
+[lib]
+name = "shared"
+path = "src/shared/lib.rs"
+
+[[bin]]
+name = "server"
+path = "src/server/main.rs"
+
+[[bin]]
+name = "client"
+path = "src/client/main.rs"
+
