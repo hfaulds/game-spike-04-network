@@ -1,12 +1,10 @@
-use bevy::{
-    prelude::{App, ClearColor, Color, SystemSet},
-    DefaultPlugins,
-};
+use bevy::{prelude::*, DefaultPlugins};
 
-use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin};
+use naia_bevy_client::{ClientConfig, Plugin as ClientPlugin, ReceiveEvents};
 use shared::protocol::protocol;
 
 mod systems;
+use systems::events;
 use systems::init;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
@@ -21,24 +19,14 @@ pub fn main() {
         .add_plugin(ClientPlugin::new(ClientConfig::default(), protocol()))
         .insert_resource(ClearColor(Color::BLACK))
         .add_startup_system(init)
-        /*.add_systems(
-            (
-                events::connect_events,
-                events::disconnect_events,
-                events::reject_events,
-                events::spawn_entity_events,
-                events::despawn_entity_events,
-                events::insert_component_events,
-                events::update_component_events,
-                events::remove_component_events,
-                events::message_events,
-            )
+        .add_systems(
+            (events::insert_component_events,)
                 .chain()
                 .in_set(ReceiveEvents),
-        )*/
+        )
         // Tick Event
-        /*.configure_set(Tick.after(ReceiveEvents))
-        .add_system(events::tick_events.in_set(Tick))*/
+        //.configure_set(Tick.after(ReceiveEvents))
+        //.add_system(events::tick_events.in_set(Tick))
         // Realtime Gameplay Loop
         /*
         .configure_set(MainLoop.after(Tick))

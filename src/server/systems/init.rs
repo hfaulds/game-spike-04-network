@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use bevy::ecs::system::Commands;
+use bevy::prelude::*;
 
 use naia_bevy_server::{transport::webrtc, Server};
 

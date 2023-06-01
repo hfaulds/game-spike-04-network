@@ -17,10 +17,7 @@ use systems::init;
 fn main() {
     App::default()
         .add_plugins(MinimalPlugins)
-        .insert_resource(
-            // this is needed to avoid running the server at uncapped FPS
-            ScheduleRunnerSettings::run_loop(Duration::from_millis(3)),
-        )
+        .insert_resource(ScheduleRunnerSettings::run_loop(Duration::from_millis(3)))
         .add_plugin(LogPlugin::default())
         .add_plugin(ServerPlugin::new(
             ServerConfig {
@@ -30,6 +27,10 @@ fn main() {
             protocol(),
         ))
         .add_startup_system(init)
-        .add_systems((events::connect_events,).chain().in_set(ReceiveEvents))
+        .add_systems(
+            (events::connect_events, events::tick_events)
+                .chain()
+                .in_set(ReceiveEvents),
+        )
         .run();
 }
