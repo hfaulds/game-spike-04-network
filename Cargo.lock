@@ -862,6 +862,7 @@ dependencies = [
  "log",
  "nalgebra",
  "rapier2d",
+ "serde",
 ]
 
 [[package]]
@@ -2192,7 +2193,6 @@ dependencies = [
  "naia-bevy-client",
  "naia-bevy-server",
  "naia-bevy-shared",
- "rapier2d",
 ]
 
 [[package]]

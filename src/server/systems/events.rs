@@ -1,11 +1,15 @@
 use super::super::resources::Global;
 use bevy::ecs::event::EventReader;
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 use naia_bevy_server::{
     events::{ConnectEvent, TickEvent},
     CommandsExt, Server,
 };
-use shared::components::Ship;
+use shared::{
+    channels::SyncShipPosition as SyncShipPositionChannel, components::Ship,
+    messages::SyncShipPosition,
+};
 
 pub fn connect_events(
     mut commands: Commands,
@@ -25,9 +29,25 @@ pub fn connect_events(
             .spawn_empty()
             .enable_replication(&mut server)
             .insert(Ship::new_complete(0))
+            .insert(RigidBody::Dynamic)
+            .insert(Collider::ball(50.0))
+            .insert(TransformBundle::from(Transform::from_xyz(0.0, 5.0, 0.0)))
             .id();
 
         server.room_mut(&global.main_room_key).add_entity(&entity);
+    }
+}
+
+pub fn sync_ship_transforms(
+    mut server: Server,
+    positions: Query<(Entity, &Transform), With<Ship>>,
+) {
+    for (entity, transform) in positions.iter() {
+        let mut position_message =
+            SyncShipPosition::new(transform.translation.x, transform.translation.y);
+        position_message.entity.set(&server, &entity);
+
+        server.broadcast_message::<SyncShipPositionChannel, SyncShipPosition>(&position_message);
     }
 }
 

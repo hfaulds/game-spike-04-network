@@ -7,11 +7,10 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.10.1"
-bevy_rapier2d = "0.21.0"
 naia-bevy-client = { version = "0.21.0", features = [ "transport_webrtc" ] }
 naia-bevy-server = { version = "0.21.0", features = [ "transport_webrtc" ] }
 naia-bevy-shared = "0.21.0"
-rapier2d = { version = "0.17.2", features = [ "enhanced-determinism" ] }
+bevy_rapier2d = { verison = "0.21.0", features = [ "enhanced-determinism", "serde" ] }
 
 [lib]
 name = "shared"

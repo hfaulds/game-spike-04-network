@@ -3,6 +3,7 @@ use bevy::{
     log::LogPlugin,
     prelude::*,
 };
+use bevy_rapier2d::prelude::*;
 use std::time::Duration;
 
 use naia_bevy_server::{Plugin as ServerPlugin, ReceiveEvents, ServerConfig};
@@ -26,9 +27,14 @@ fn main() {
             },
             protocol(),
         ))
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_startup_system(init)
         .add_systems(
-            (events::connect_events, events::tick_events)
+            (
+                events::connect_events,
+                events::tick_events,
+                events::sync_ship_transforms,
+            )
                 .chain()
                 .in_set(ReceiveEvents),
         )

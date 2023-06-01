@@ -1,13 +1,14 @@
-use std::default::Default;
-
 use bevy::{
     prelude::*,
     sprite::{Sprite, SpriteBundle},
 };
-
 use naia_bevy_client::events::InsertComponentEvents;
-
-use shared::components::Ship;
+use naia_bevy_client::{events::MessageEvents, Client};
+use shared::{
+    channels::SyncShipPosition as SyncShipPositionChannel, components::Ship,
+    messages::SyncShipPosition,
+};
+use std::default::Default;
 
 const SQUARE_SIZE: f32 = 32.0;
 
@@ -25,6 +26,21 @@ pub fn insert_component_events(
                 transform: Transform::from_xyz(0.0, 0.0, 0.0),
                 ..Default::default()
             });
+        }
+    }
+}
+
+pub fn sync_ship_positions(
+    client: Client,
+    mut event_reader: EventReader<MessageEvents>,
+    mut positions: Query<&mut Transform, With<Ship>>,
+) {
+    for events in event_reader.iter() {
+        for message in events.read::<SyncShipPositionChannel, SyncShipPosition>() {
+            let entity = message.entity.get(&client).unwrap();
+            let mut transform = positions.get_mut(entity).unwrap();
+            transform.translation.x = message.x;
+            transform.translation.y = message.y;
         }
     }
 }

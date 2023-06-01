@@ -20,7 +20,7 @@ pub fn main() {
         .insert_resource(ClearColor(Color::BLACK))
         .add_startup_system(init)
         .add_systems(
-            (events::insert_component_events,)
+            (events::insert_component_events, events::sync_ship_positions)
                 .chain()
                 .in_set(ReceiveEvents),
         )
