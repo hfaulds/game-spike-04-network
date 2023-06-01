@@ -2,6 +2,14 @@ use naia_bevy_shared::{EntityProperty, Message};
 use naia_bevy_shared::{Protocol, ProtocolPlugin};
 
 #[derive(Message)]
+pub struct MovementCommand {
+    pub up: bool,
+    pub down: bool,
+    pub left: bool,
+    pub right: bool,
+}
+
+#[derive(Message)]
 pub struct SyncShipPosition {
     pub entity: EntityProperty,
     pub x: f32,
@@ -23,6 +31,8 @@ pub struct MessagesPlugin;
 
 impl ProtocolPlugin for MessagesPlugin {
     fn build(&self, protocol: &mut Protocol) {
-        protocol.add_message::<SyncShipPosition>();
+        protocol
+            .add_message::<SyncShipPosition>()
+            .add_message::<MovementCommand>();
     }
 }

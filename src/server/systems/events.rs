@@ -7,13 +7,14 @@ use naia_bevy_server::{
     CommandsExt, Server,
 };
 use shared::{
-    channels::SyncShipPosition as SyncShipPositionChannel, components::Ship,
-    messages::SyncShipPosition,
+    channels::{PlayerCommandChannel, SyncShipPositionChannel},
+    components::Ship,
+    messages::{MovementCommand, SyncShipPosition},
 };
 
 pub fn connect_events(
     mut commands: Commands,
-    global: Res<Global>,
+    mut global: ResMut<Global>,
     mut server: Server,
     mut event_reader: EventReader<ConnectEvent>,
 ) {
@@ -31,10 +32,12 @@ pub fn connect_events(
             .insert(Ship::new_complete(0))
             .insert(RigidBody::Dynamic)
             .insert(Collider::ball(50.0))
+            .insert(ExternalImpulse::default())
             .insert(TransformBundle::from(Transform::from_xyz(0.0, 5.0, 0.0)))
             .id();
 
         server.room_mut(&global.main_room_key).add_entity(&entity);
+        global.user_to_ship.insert(*user_key, entity);
     }
 }
 
@@ -51,15 +54,41 @@ pub fn sync_ship_transforms(
     }
 }
 
-pub fn tick_events(mut server: Server, mut _tick_reader: EventReader<TickEvent>) {
-    for (_, user_key, entity) in server.scope_checks() {
-        // You'd normally do whatever checks you need to in here..
-        // to determine whether each Entity should be in scope or not.
+pub fn tick_events(
+    global: Res<Global>,
+    mut server: Server,
+    mut tick_reader: EventReader<TickEvent>,
+    mut ship_impulses: Query<&mut ExternalImpulse, With<Ship>>,
+) {
+    let mut has_ticked = false;
 
-        // This indicates the Entity should be in this scope.
-        server.user_scope(&user_key).include(&entity);
+    for TickEvent(server_tick) in tick_reader.iter() {
+        has_ticked = true;
 
-        // And call this if Entity should NOT be in this scope.
-        // server.user_scope(..).exclude(..);
+        let mut messages = server.receive_tick_buffer_messages(server_tick);
+        for (user_key, command) in messages.read::<PlayerCommandChannel, MovementCommand>() {
+            if command.up {
+                let Some(entity) = global.user_to_ship.get(&user_key) else {
+                    continue;
+                };
+                let Ok(mut impulse) = ship_impulses.get_mut(*entity) else {
+                    continue;
+                };
+                impulse.impulse = Vec2::new(0.0, 5.0);
+            }
+        }
+    }
+
+    if has_ticked {
+        for (_, user_key, entity) in server.scope_checks() {
+            // You'd normally do whatever checks you need to in here..
+            // to determine whether each Entity should be in scope or not.
+
+            // This indicates the Entity should be in this scope.
+            server.user_scope(&user_key).include(&entity);
+
+            // And call this if Entity should NOT be in this scope.
+            // server.user_scope(..).exclude(..);
+        }
     }
 }

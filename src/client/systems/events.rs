@@ -1,12 +1,16 @@
+use super::super::resources::Global;
 use bevy::{
     prelude::*,
     sprite::{Sprite, SpriteBundle},
 };
-use naia_bevy_client::events::InsertComponentEvents;
-use naia_bevy_client::{events::MessageEvents, Client};
+use naia_bevy_client::{
+    events::{ClientTickEvent, InsertComponentEvents, MessageEvents},
+    Client,
+};
 use shared::{
-    channels::SyncShipPosition as SyncShipPositionChannel, components::Ship,
-    messages::SyncShipPosition,
+    channels::{PlayerCommandChannel, SyncShipPositionChannel},
+    components::Ship,
+    messages::{MovementCommand, SyncShipPosition},
 };
 use std::default::Default;
 
@@ -42,5 +46,22 @@ pub fn sync_ship_positions(
             transform.translation.x = message.x;
             transform.translation.y = message.y;
         }
+    }
+}
+
+pub fn tick_events(
+    mut client: Client,
+    mut tick_reader: EventReader<ClientTickEvent>,
+    mut global: ResMut<Global>,
+) {
+    let Some(command) = global.queued_command.take() else {
+        return;
+    };
+
+    for ClientTickEvent(client_tick) in tick_reader.iter() {
+        client.send_tick_buffer_message::<PlayerCommandChannel, MovementCommand>(
+            client_tick,
+            &command,
+        );
     }
 }

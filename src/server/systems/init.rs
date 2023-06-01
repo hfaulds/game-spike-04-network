@@ -28,5 +28,5 @@ pub fn init(mut commands: Commands, mut server: Server) {
     let main_room_key = server.make_room().key();
 
     // Insert the Global resource, which will be used by other systems
-    commands.insert_resource(Global { main_room_key });
+    commands.insert_resource(Global::new(main_room_key));
 }

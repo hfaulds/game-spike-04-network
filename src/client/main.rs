@@ -6,6 +6,9 @@ use shared::protocol::protocol;
 mod systems;
 use systems::events;
 use systems::init;
+use systems::input;
+
+mod resources;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 struct MainLoop;
@@ -24,24 +27,10 @@ pub fn main() {
                 .chain()
                 .in_set(ReceiveEvents),
         )
-        // Tick Event
-        //.configure_set(Tick.after(ReceiveEvents))
-        //.add_system(events::tick_events.in_set(Tick))
-        // Realtime Gameplay Loop
-        /*
+        .configure_set(Tick.after(ReceiveEvents))
+        .add_system(events::tick_events.in_set(Tick))
         .configure_set(MainLoop.after(Tick))
-        .add_systems(
-            (
-                input::key_input,
-                input::cursor_input,
-                sync::sync_clientside_sprites,
-                sync::sync_serverside_sprites,
-                sync::sync_cursor_sprite,
-            )
-                .chain()
-                .in_set(MainLoop),
-        )
-        */
+        .add_system(input::key_input.in_set(MainLoop))
         // Run App
         .run();
 }
